@@ -1,4 +1,7 @@
 Revision history for Perl extension Module::Pluggable::Fast
 
+0.11  Mon Dec 20 20:00:00 2004
+        - faster instantiation
+
 0.10  Sun Dec 19 18:00:00 2004
         - original version.
