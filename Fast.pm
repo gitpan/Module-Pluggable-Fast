@@ -8,7 +8,7 @@ use File::Find::Rule 'find';
 use File::Basename;
 use File::Spec::Functions qw/splitdir catdir abs2rel/;
 
-$VERSION = '0.12';
+$VERSION = '0.13';
 
 =head1 NAME
 
