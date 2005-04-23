@@ -8,7 +8,7 @@ use File::Find::Rule 'find';
 use File::Basename;
 use File::Spec::Functions qw/splitdir catdir abs2rel/;
 
-$VERSION = '0.13';
+$VERSION = '0.14';
 
 =head1 NAME
 
@@ -64,7 +64,8 @@ sub import {
                     my $plugin = join '::', splitdir catdir $searchpath,
                       $directory, $name;
                     $plugin->require;
-                    carp qq/Couldn't require "$plugin", "$@"/ if $@;
+                    my $error = $UNIVERSAL::require::ERROR;
+                    die qq/Couldn't load "$plugin", "$error"/ if $@;
                     $plugins{$plugin} = _instantiate( $plugin, @_ );
                     for my $class ( _list_packages($plugin) ) {
                         next if $plugins{$class};
