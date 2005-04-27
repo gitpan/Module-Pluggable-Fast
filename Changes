@@ -1,12 +1,15 @@
 Revision history for Perl extension Module::Pluggable::Fast
 
-0.14  Sat Apr 23 16:42:00 2004
+0.15  Xxx Xxx 00 00:00:00 2005
+        - added require option
+
+0.14  Sat Apr 23 16:42:00 2005
         - die on syntax errors
 
-0.13  Mon Mar 7 20:00:00 2004
+0.13  Mon Mar 7 20:00:00 2005
         - fixed prereqs (Juergen Peters)
 
-0.12  Tue Jan 25 20:00:00 2004
+0.12  Tue Jan 25 20:00:00 2005
         - fixed dependencies (Marcus Ramberg)
 
 0.11  Mon Dec 20 20:00:00 2004

@@ -4,11 +4,11 @@ use strict;
 use vars '$VERSION';
 use UNIVERSAL::require;
 use Carp qw/croak carp/;
-use File::Find::Rule 'find';
+use File::Find ();
 use File::Basename;
 use File::Spec::Functions qw/splitdir catdir abs2rel/;
 
-$VERSION = '0.14';
+$VERSION = '0.15';
 
 =head1 NAME
 
@@ -37,6 +37,10 @@ found, useful for code generators like C<Class::DBI::Loader>.
 Name for the exported method.
 Defaults to plugins.
 
+=head3 require
+
+If true, only require plugins.
+
 =head3 search
 
 Arrayref containing a list of namespaces to search for plugins.
@@ -50,15 +54,15 @@ sub import {
     no strict 'refs';
     *{ "$caller\::" . ( $args{name} || 'plugins' ) } = sub {
         my $self = shift;
-        $args{search} ||= ["$caller\::Plugin"];
+        $args{search}  ||= ["$caller\::Plugin"];
+        $args{require} ||= 0;        
         my %plugins;
         foreach my $dir ( exists $INC{'blib.pm'} ? grep { /blib/ } @INC : @INC )
         {
             foreach my $searchpath ( @{ $args{search} } ) {
                 my $sp = catdir( $dir, ( split /::/, $searchpath ) );
                 next unless ( -e $sp && -d $sp );
-                my @files = find( name => '*.pm', in => [$sp] );
-                foreach my $file (@files) {
+                foreach my $file ( _find_packages($sp) ) {
                     my ( $name, $directory ) = fileparse $file, qr/\.pm/;
                     $directory = abs2rel $directory, $sp;
                     my $plugin = join '::', splitdir catdir $searchpath,
@@ -66,16 +70,32 @@ sub import {
                     $plugin->require;
                     my $error = $UNIVERSAL::require::ERROR;
                     die qq/Couldn't load "$plugin", "$error"/ if $@;
-                    $plugins{$plugin} = _instantiate( $plugin, @_ );
+                    $plugins{$plugin} = $args{require} ? $plugin : _instantiate( $plugin, @_ );
                     for my $class ( _list_packages($plugin) ) {
                         next if $plugins{$class};
-                        $plugins{$class} = _instantiate( $class, @_ );
+                        $plugins{$class} = $args{require} ? $class : _instantiate( $class, @_ );
                     }
                 }
             }
         }
         return values %plugins;
     };
+}
+
+sub _find_packages {
+    my $search = shift;
+
+    my @files = ();
+
+    my $wanted = sub {
+        return unless $File::Find::name =~ /\.pm$/;
+        ( my $path = $File::Find::name ) =~ s#^\\./##;
+        push @files, $path;
+    };
+
+    File::Find::find( { no_chdir => 1, wanted => $wanted }, $search );
+
+    return @files;
 }
 
 sub _instantiate {
