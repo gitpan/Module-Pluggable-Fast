@@ -1,6 +1,9 @@
 Revision history for Perl extension Module::Pluggable::Fast
 
-0.15  Xxx Xxx 00 00:00:00 2005
+0.16  Fri Jun 03 02:47:00 2005
+        - added callback option
+
+0.15  Wen Apr 27 00:00:00 2005
         - added require option
 
 0.14  Sat Apr 23 16:42:00 2005

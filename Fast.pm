@@ -8,7 +8,7 @@ use File::Find ();
 use File::Basename;
 use File::Spec::Functions qw/splitdir catdir abs2rel/;
 
-$VERSION = '0.15';
+$VERSION = '0.16';
 
 =head1 NAME
 
@@ -41,6 +41,10 @@ Defaults to plugins.
 
 If true, only require plugins.
 
+=head3 callback
+
+Codref to be called instead of the default instantiate callback.
+
 =head3 search
 
 Arrayref containing a list of namespaces to search for plugins.
@@ -54,8 +58,16 @@ sub import {
     no strict 'refs';
     *{ "$caller\::" . ( $args{name} || 'plugins' ) } = sub {
         my $self = shift;
-        $args{search}  ||= ["$caller\::Plugin"];
-        $args{require} ||= 0;        
+        $args{search}   ||= ["$caller\::Plugin"];
+        $args{require}  ||= 0;
+        $args{callback} ||= sub {
+            my $plugin = shift;
+            my $obj    = $plugin;
+            eval { $obj = $plugin->new(@_) };
+            carp qq/Couldn't instantiate "$plugin", "$@"/ if $@;
+            return $obj;
+        };
+
         my %plugins;
         foreach my $dir ( exists $INC{'blib.pm'} ? grep { /blib/ } @INC : @INC )
         {
@@ -70,10 +82,20 @@ sub import {
                     $plugin->require;
                     my $error = $UNIVERSAL::require::ERROR;
                     die qq/Couldn't load "$plugin", "$error"/ if $@;
-                    $plugins{$plugin} = $args{require} ? $plugin : _instantiate( $plugin, @_ );
+
+                    unless ( $plugins{$plugin} ) {
+                        $plugins{$plugin} =
+                            $args{require}
+                          ? $plugin
+                          : $args{callback}->( $plugin, @_ );
+                    }
+
                     for my $class ( _list_packages($plugin) ) {
                         next if $plugins{$class};
-                        $plugins{$class} = $args{require} ? $class : _instantiate( $class, @_ );
+                        $plugins{$class} =
+                            $args{require}
+                          ? $class
+                          : $args{callback}->( $class, @_ );
                     }
                 }
             }
@@ -96,14 +118,6 @@ sub _find_packages {
     File::Find::find( { no_chdir => 1, wanted => $wanted }, $search );
 
     return @files;
-}
-
-sub _instantiate {
-    my $plugin = shift;
-    my $obj    = $plugin;
-    eval { $obj = $plugin->new(@_) };
-    carp qq/Couldn't instantiate "$plugin", "$@"/ if $@;
-    return $obj;
 }
 
 sub _list_packages {
