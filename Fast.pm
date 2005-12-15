@@ -8,7 +8,7 @@ use File::Find ();
 use File::Basename;
 use File::Spec::Functions qw/splitdir catdir abs2rel/;
 
-$VERSION = '0.16';
+$VERSION = '0.17';
 
 =head1 NAME
 
@@ -81,7 +81,7 @@ sub import {
                       $directory, $name;
                     $plugin->require;
                     my $error = $UNIVERSAL::require::ERROR;
-                    die qq/Couldn't load "$plugin", "$error"/ if $@;
+                    die qq/Couldn't load "$plugin", "$error"/ if $error;
 
                     unless ( $plugins{$plugin} ) {
                         $plugins{$plugin} =
@@ -110,8 +110,13 @@ sub _find_packages {
     my @files = ();
 
     my $wanted = sub {
-        return unless $File::Find::name =~ /\.pm$/;
-        ( my $path = $File::Find::name ) =~ s#^\\./##;
+        my $path = $File::Find::name;
+        return unless $path =~ /\w+\.pm$/;
+
+        # don't include symbolig links pointing into nowhere
+        # (e.g. emacs lock-files)
+        return if -l $path && !-e $path;
+        $path =~ s#^\\./##;
         push @files, $path;
     };
 

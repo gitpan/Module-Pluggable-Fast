@@ -1,5 +1,11 @@
 Revision history for Perl extension Module::Pluggable::Fast
 
+0.17  Thu Dec 15 00:00:00 2005
+        - Added tests from Module::Pluggable
+        - Updated regex
+        - Fixed to properly die on error messages from components.
+          (Andy Grundman)
+
 0.16  Fri Jun 03 02:47:00 2005
         - added callback option
 

@@ -1,4 +1,7 @@
+#!perl -wT
+
 use strict;
 use Test::More tests => 1;
 
-BEGIN { use_ok('Module::Pluggable::Fast') }
+use_ok('Module::Pluggable');
+
