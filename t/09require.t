@@ -15,8 +15,8 @@ ok(keys %{MyTest::Plugin::Foo::});
 package MyTest;
 use File::Spec::Functions qw(catdir);
 use strict;
-use Module::Pluggable (require => 1);
-use base qw(Module::Pluggable);
+use Module::Pluggable::Fast (require => 1);
+use base qw(Module::Pluggable::Fast);
 
 
 sub new {

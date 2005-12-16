@@ -18,8 +18,8 @@ ok(!$plugins{'InnerTest::Plugin::Bar'}, "Didn't get Bar - the inner package");
 
 package InnerTest;
 use strict;
-use Module::Pluggable require => 1, inner => 0;
-use base qw(Module::Pluggable);
+use Module::Pluggable::Fast require => 1, inner => 0;
+use base qw(Module::Pluggable::Fast);
 
 
 sub new {
