@@ -8,7 +8,7 @@ use File::Find ();
 use File::Basename;
 use File::Spec::Functions qw/splitdir catdir abs2rel/;
 
-$VERSION = '0.18';
+$VERSION = '0.19';
 
 =head1 NAME
 
@@ -112,6 +112,8 @@ sub _find_packages {
     my $wanted = sub {
         my $path = $File::Find::name;
         return unless $path =~ /\w+\.pm$/;
+        return unless $path =~ /\A(.+)\z/;
+        $path = $1;     # untaint
 
         # don't include symbolig links pointing into nowhere
         # (e.g. emacs lock-files)
